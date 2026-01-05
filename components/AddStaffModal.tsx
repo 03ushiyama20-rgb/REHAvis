@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, GraduationCap, Briefcase, Award, Save, School as SchoolIcon, Calendar, Trash2, History, Target, ShieldCheck, Activity, HeartPulse, Speech, PlusCircle, MessageSquare, Edit2, CheckCircle2 } from 'lucide-react';
+import { X, UserPlus, GraduationCap, Briefcase, Award, Save, School as SchoolIcon, Calendar, Trash2, History, Target, ShieldCheck, Activity, HeartPulse, Speech, PlusCircle, MessageSquare, Edit2, CheckCircle2, ChevronRight, ArrowRight } from 'lucide-react';
 
 interface AddStaffModalProps {
   isOpen: boolean;
@@ -35,40 +35,40 @@ const CERT_CATEGORIES = [
     label: '共通・チーム医療・指導', 
     items: [
       "3学会合同呼吸療法認定士", "心臓リハビリテーション指導士", "臨床実習指導者講習会修了", 
-      "地域包括ケア推進リーダー", "介護予防推進リーダー", "介護支援専門員(ケアマネ)", 
-      "福祉住環境コーディネーター2級", "福祉住環境コーディネーター1級", "認知症ケア専門士",
-      "がんリハビリテーション研修修了", "終末期ケア専門士", "NST専門療法士", "ボバース概念（基礎講習会）修了",
-      "認知神経リハビリテーション（マスター）"
+      "地域ケア推進リーダー", "介護予防推進リーダー", "介護支援専門員", 
+      "福祉住環境コーディネーター2級", "認知症ケア専門士",
+      "がんリハ研修修了", "終末期ケア専門士", "NST専門療法士", "ボバース基礎修了",
+      "認知神経リハ", "糖尿病療養指導士", "福祉用具専門相談員", "ケアマネジャー",
+      "公認心理師", "排泄リハ認定", "骨粗鬆症マネージャー", "サルコペニア・フレイル指導士"
     ] 
   },
   { 
     id: 'pt', 
     label: '理学療法士 専門・認定', 
     items: [
-      "登録理学療法士", "認定PT(脳卒中)", "認定PT(運動器)", "認定PT(循環器)", "認定PT(呼吸器)", 
-      "認定PT(神経筋)", "認定PT(スポーツ)", "認定PT(小児)", "認定PT(代謝)", "認定PT(ウィメンズヘルス)", 
-      "専門PT(基礎)", "専門PT(神経)", "専門PT(運動器)", "専門PT(内部障害)", "専門PT(生活環境支援)",
-      "日本スポーツ協会公認AT", "SJF（関節ファシリテーション）技能者"
+      "登録理学療法士", "認定PT(脳卒中)", "認定PT(運動器)", "認定PT(循環器)", 
+      "認定PT(呼吸器)", "認定PT(神経系)", "認定PT(小児)", "認定PT(スポーツ)",
+      "認定PT(代謝)", "認定PT(臨床教育)", "認定PT(管理・運営)",
+      "専門PT(基礎)", "専門PT(神経系)", "専門PT(運動器)", "専門PT(内部障害)",
+      "日本スポーツ協会公認AT"
     ] 
   },
   { 
     id: 'ot', 
     label: '作業療法士 専門・認定', 
     items: [
-      "認定作業療法士", "専門OT(脳血管障害)", "専門OT(高次脳機能障害)", "専門OT(身体障害)", 
-      "専門OT(精神障害)", "専門OT(発達障害)", "専門OT(特別支援教育)", "AMPS認定評価者", 
-      "MTDLP(生活行為向上マネジメント)修了", "シーティング・コンサルタント", "手外科（ハンドセラピスト）認定",
-      "福祉用具プランナー", "感覚統合（SI）認定", "高次脳機能障害支援コーディネーター"
+      "認定作業療法士", "専門OT(脳血管)", "専門OT(高次脳)", "専門OT(身体障害)",
+      "専門OT(精神障害)", "専門OT(発達障害)", "専門OT(老年期)",
+      "MTDLP修了", "シーティングコンサルタント", "AMPS認定評価者", "FIM講習会修了"
     ] 
   },
   { 
     id: 'st', 
     label: '言語聴覚士 専門・認定', 
     items: [
-      "認定ST(摂食・嚥下障害)", "認定ST(失語・高次脳機能障害)", "認定ST(言語発達障害)", 
-      "認定ST(聴覚障害)", "認定ST(成人発声発語障害)", "日本摂食嚥下リハビリテーション学会認定士", 
-      "LSVT LOUD認定", "嚥下内視鏡検査(VE)研修修了", "認知症コミュニケーション等習得研修修了",
-      "小児摂食嚥下（研修会）修了", "構音障害支援アドバイザー"
+      "認定ST(摂食嚥下)", "認定ST(失語・高次脳)", "認定ST(聴覚障害)",
+      "認定ST(言語発達障害)", "認定ST(発声発語障害)",
+      "LSVT LOUD認定", "嚥下内視鏡(VE)研修修了", "ディサースリア認定"
     ] 
   }
 ];
@@ -125,23 +125,59 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onAdd, o
     }
   }, [editStaff, isOpen]);
 
-  const addExpRow = () => {
-    setFormData({
-      ...formData,
-      experienceHistory: [...formData.experienceHistory, { domains: [DOMAIN_OPTIONS[0]], startYear: 1, endYear: '現在' }]
+  useEffect(() => {
+    if (!isOpen) return;
+    setFormData(prev => {
+      const newHistory = [...prev.experienceHistory];
+      if (newHistory.length > 0) {
+        const lastIdx = newHistory.length - 1;
+        newHistory[lastIdx] = { ...newHistory[lastIdx], endYear: '現在' };
+        if (newHistory[lastIdx].startYear > prev.experienceYears) {
+          newHistory[lastIdx].startYear = prev.experienceYears;
+        }
+      }
+      return { ...prev, experienceHistory: newHistory };
     });
+  }, [formData.experienceYears]);
+
+  const addExpRow = () => {
+    const history = [...formData.experienceHistory];
+    const lastRow = history[history.length - 1];
+    history[history.length - 1] = { 
+      ...lastRow, 
+      endYear: `${formData.experienceYears}年目` 
+    };
+    history.push({
+      domains: [DOMAIN_OPTIONS[0]],
+      startYear: formData.experienceYears,
+      endYear: '現在'
+    });
+    setFormData({ ...formData, experienceHistory: history });
   };
 
   const removeExpRow = (index: number) => {
-    setFormData({
-      ...formData,
-      experienceHistory: formData.experienceHistory.filter((_, i) => i !== index)
-    });
+    let newHistory = formData.experienceHistory.filter((_, i) => i !== index);
+    if (newHistory.length > 0) {
+      newHistory[newHistory.length - 1].endYear = '現在';
+    }
+    setFormData({ ...formData, experienceHistory: newHistory });
   };
 
-  const updateExpRow = (index: number, field: string, value: any) => {
+  const updateExpRowStart = (index: number, year: number) => {
     const newHistory = [...formData.experienceHistory];
-    newHistory[index] = { ...newHistory[index], [field]: value };
+    const minVal = index > 0 ? newHistory[index-1].startYear + 1 : 1;
+    const safeYear = Math.max(minVal, Math.min(formData.experienceYears, year));
+    newHistory[index].startYear = safeYear;
+    if (index > 0) {
+      const prevEndVal = safeYear - 1;
+      newHistory[index - 1].endYear = prevEndVal >= 1 ? `${prevEndVal}年目` : `1年目`;
+    }
+    setFormData({ ...formData, experienceHistory: newHistory });
+  };
+
+  const updateExpRowDomain = (index: number, domain: string) => {
+    const newHistory = [...formData.experienceHistory];
+    newHistory[index].domains = [domain];
     setFormData({ ...formData, experienceHistory: newHistory });
   };
 
@@ -182,156 +218,131 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onAdd, o
           </div>
 
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-8 py-10 space-y-12 no-scrollbar pb-32">
-            
-            {/* 基本情報 */}
             <section className="space-y-6">
               <div className="flex items-center space-x-2">
                 <div className="w-1.5 h-5 bg-indigo-600 rounded-full"></div>
-                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">基本・識別情報</h3>
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">基本情報</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">苗字</label>
-                  <input required placeholder="例: 佐藤" className="h-16 px-6 bg-slate-50 border-none rounded-2xl text-lg font-black shadow-inner w-full focus:ring-2 focus:ring-indigo-500" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
+                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">苗字</label>
+                   <input required placeholder="姓" className="h-16 px-6 bg-slate-50 border-none rounded-2xl text-lg font-black shadow-inner w-full focus:ring-2 focus:ring-indigo-500" value={formData.lastName} onChange={e => setFormData({ ...formData, lastName: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">名前</label>
-                  <input required placeholder="例: 太郎" className="h-16 px-6 bg-slate-50 border-none rounded-2xl text-lg font-black shadow-inner w-full focus:ring-2 focus:ring-indigo-500" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} />
+                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">名前</label>
+                   <input required placeholder="名" className="h-16 px-6 bg-slate-50 border-none rounded-2xl text-lg font-black shadow-inner w-full focus:ring-2 focus:ring-indigo-500" value={formData.firstName} onChange={e => setFormData({ ...formData, firstName: e.target.value })} />
                 </div>
               </div>
             </section>
 
-            {/* 職種・キャリアスライダー */}
             <section className="space-y-8">
               <div className="flex items-center space-x-2">
                 <div className="w-1.5 h-5 bg-blue-600 rounded-full"></div>
-                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">職種・入職背景</h3>
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">職種と臨床経験</h3>
               </div>
-              
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">職種</label>
-                  <div className="flex p-1.5 bg-slate-100 rounded-[2rem] gap-2">
-                    {ROLES.map(r => (
-                      <button key={r.id} type="button" onClick={() => setFormData({ ...formData, role: r.id })} className={`flex-1 flex flex-col items-center justify-center py-4 rounded-[1.5rem] transition-all gap-2 ${formData.role === r.id ? 'bg-white shadow-xl text-slate-900 scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}>
-                        <r.icon size={24} className={formData.role === r.id ? r.color : 'text-slate-300'} />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{r.label}</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="flex p-1.5 bg-slate-100 rounded-[2rem] gap-2">
+                  {ROLES.map(r => (
+                    <button key={r.id} type="button" onClick={() => setFormData({ ...formData, role: r.id })} className={`flex-1 flex flex-col items-center justify-center py-4 rounded-[1.5rem] transition-all gap-2 ${formData.role === r.id ? 'bg-white shadow-xl text-slate-900' : 'text-slate-400'}`}>
+                      <r.icon size={20} className={formData.role === r.id ? r.color : 'text-slate-300'} />
+                      <span className="text-[10px] font-black uppercase tracking-widest">{r.label}</span>
+                    </button>
+                  ))}
                 </div>
-
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">採用区分</label>
-                  <div className="flex p-1.5 bg-slate-100 rounded-[2rem] gap-2">
-                    <button type="button" onClick={() => setFormData({ ...formData, isMidCareer: false, preExperienceYears: 0 })} className={`flex-1 flex items-center justify-center py-4 rounded-[1.5rem] transition-all gap-3 ${!formData.isMidCareer ? 'bg-white shadow-xl text-indigo-600' : 'text-slate-400'}`}>
-                      <GraduationCap size={20} />
-                      <span className="text-xs font-black uppercase tracking-widest">新卒入職</span>
-                    </button>
-                    <button type="button" onClick={() => setFormData({ ...formData, isMidCareer: true })} className={`flex-1 flex items-center justify-center py-4 rounded-[1.5rem] transition-all gap-3 ${formData.isMidCareer ? 'bg-white shadow-xl text-amber-600' : 'text-slate-400'}`}>
-                      <Briefcase size={20} />
-                      <span className="text-xs font-black uppercase tracking-widest">中途採用（既卒）</span>
-                    </button>
-                  </div>
+                <div className="flex p-1.5 bg-slate-100 rounded-[2rem] gap-2">
+                  <button type="button" onClick={() => setFormData({ ...formData, isMidCareer: false })} className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest ${!formData.isMidCareer ? 'bg-white shadow-xl text-indigo-600' : 'text-slate-400'}`}>新卒入職</button>
+                  <button type="button" onClick={() => setFormData({ ...formData, isMidCareer: true })} className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest ${formData.isMidCareer ? 'bg-white shadow-xl text-amber-600' : 'text-slate-400'}`}>中途採用</button>
                 </div>
               </div>
-
-              <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-8">
+              <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6 shadow-inner">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">現在の合計臨床経験</label>
-                  <div className="px-6 py-2 bg-indigo-600 text-white rounded-full text-xl font-black shadow-lg">
-                    {formData.experienceYears} <span className="text-xs font-bold ml-1">年目</span>
-                  </div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><History size={14} /> 合計臨床経験</label>
+                  <div className="px-6 py-2 bg-indigo-600 text-white rounded-full text-xl font-black shadow-lg">{formData.experienceYears}年目</div>
                 </div>
-                <input type="range" min="1" max="40" step="1" className="w-full h-3 bg-slate-200 rounded-full appearance-none cursor-pointer accent-indigo-600" value={formData.experienceYears} onChange={e => {
+                <input type="range" min="1" max="40" className="w-full h-3 bg-slate-200 rounded-full appearance-none cursor-pointer accent-indigo-600" value={formData.experienceYears} onChange={e => {
                   const val = parseInt(e.target.value);
                   setFormData({ ...formData, experienceYears: val, clinicalLadder: String(Math.min(4, Math.floor(val / 3) + 1)) });
                 }} />
-                {formData.isMidCareer && (
-                  <div className="p-6 bg-white border-2 border-dashed border-amber-200 rounded-[2rem] animate-in slide-in-from-top-4 flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center mb-1"><History size={14} className="mr-2" /> 前職までのキャリア</p>
-                      <p className="text-xs font-bold text-slate-400">入職時点で何年の経験がありましたか？</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input type="number" className="w-20 h-12 bg-slate-50 border-none rounded-xl text-center font-black" value={formData.preExperienceYears} onChange={e => setFormData({ ...formData, preExperienceYears: parseInt(e.target.value) || 0 })} />
-                      <span className="text-[10px] font-black text-slate-400 uppercase">Years</span>
-                    </div>
-                  </div>
-                )}
               </div>
             </section>
 
-            {/* 経験領域履歴（タイムライン）- 復活セクション */}
             <section className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-1.5 h-5 bg-purple-600 rounded-full"></div>
-                  <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">経験領域の推移（タイムライン）</h3>
+                  <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">配属履歴・期間</h3>
                 </div>
-                <button type="button" onClick={addExpRow} className="flex items-center space-x-2 text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:opacity-70">
-                   <PlusCircle size={16} /> <span>職歴を追加</span>
+                <button type="button" onClick={addExpRow} className="flex items-center space-x-2 text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-4 py-2 rounded-full border border-indigo-100 shadow-sm hover:bg-indigo-100 transition-all">
+                   <PlusCircle size={14} /> <span>職歴を追加</span>
                 </button>
               </div>
               <div className="space-y-4">
-                {formData.experienceHistory.map((row, idx) => (
-                  <div key={idx} className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 flex flex-col md:flex-row items-center gap-6 animate-in slide-in-from-left-2 shadow-sm">
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-100 shadow-inner">
-                        {idx + 1}
+                {formData.experienceHistory.map((row, idx) => {
+                  const isFirst = idx === 0;
+                  const isLast = idx === formData.experienceHistory.length - 1;
+                  return (
+                    <div key={idx} className="bg-white p-6 rounded-[2.5rem] border-2 border-slate-50 flex flex-col md:flex-row items-center gap-6 group shadow-sm hover:border-indigo-100 transition-all">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-lg">{idx + 1}</div>
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                        <div className="space-y-2">
+                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">配属領域（チーム）</span>
+                          <select className="h-14 px-5 bg-slate-50 border-none rounded-2xl text-xs font-bold w-full shadow-inner focus:ring-2 focus:ring-indigo-500" value={row.domains[0]} onChange={e => updateExpRowDomain(idx, e.target.value)}>
+                            {DOMAIN_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between ml-1">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">開始年調整</span>
+                            <div className="flex items-center gap-2 text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+                               {row.startYear}年目 <ArrowRight size={10} /> {row.endYear === '現在' ? `現在` : row.endYear}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <input 
+                              type="range" 
+                              min="1" 
+                              max={formData.experienceYears} 
+                              disabled={isFirst} 
+                              className={`flex-1 h-2 rounded-full appearance-none cursor-pointer accent-indigo-600 ${isFirst ? 'opacity-30 cursor-not-allowed' : 'bg-slate-100'}`} 
+                              value={row.startYear} 
+                              onChange={e => updateExpRowStart(idx, parseInt(e.target.value))} 
+                            />
+                            {formData.experienceHistory.length > 1 && !isLast && (
+                              <button type="button" onClick={() => removeExpRow(idx)} className="p-3 text-slate-300 hover:text-rose-500 transition-all bg-slate-50 rounded-xl hover:bg-rose-50"><Trash2 size={18} /></button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                      <div className="space-y-2">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">領域</p>
-                        <select className="w-full h-12 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold shadow-sm" value={row.domains[0]} onChange={e => updateExpRow(idx, 'domains', [e.target.value])}>
-                          {DOMAIN_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">開始年（臨床◯年目）</p>
-                        <input type="number" className="w-full h-12 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold shadow-sm" value={row.startYear} onChange={e => updateExpRow(idx, 'startYear', parseInt(e.target.value))} />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">終了年</p>
-                        <input type="text" className="w-full h-12 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold shadow-sm" value={row.endYear} onChange={e => updateExpRow(idx, 'endYear', e.target.value)} />
-                      </div>
-                    </div>
-                    {formData.experienceHistory.length > 1 && (
-                      <button type="button" onClick={() => removeExpRow(idx)} className="p-3 text-rose-400 hover:bg-rose-50 rounded-xl transition-all"><Trash2 size={20} /></button>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
-            {/* ラダー習熟度 */}
             <section className="space-y-6">
               <div className="flex items-center space-x-2">
                 <div className="w-1.5 h-5 bg-amber-500 rounded-full"></div>
-                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">習熟度・ラダー位置</h3>
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">習熟度 (Clinical Ladder)</h3>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-3">
                 {[1, 2, 3, 4].map(level => (
-                  <button key={level} type="button" onClick={() => setFormData({ ...formData, clinicalLadder: String(level) })} className={`flex flex-col items-center justify-center p-6 rounded-[2rem] border-2 transition-all gap-2 ${formData.clinicalLadder === String(level) ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl translate-y-[-4px]' : 'bg-white border-slate-100 text-slate-400 hover:border-indigo-200'}`}>
-                    <Target size={20} />
-                    <span className="text-xs font-black uppercase tracking-widest">Level {level}</span>
+                  <button key={level} type="button" onClick={() => setFormData({ ...formData, clinicalLadder: String(level) })} className={`py-4 rounded-2xl border-2 transition-all ${formData.clinicalLadder === String(level) ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400'}`}>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Level {level}</span>
                   </button>
                 ))}
               </div>
             </section>
 
-            {/* 学歴・学位 */}
             <section className="space-y-6">
               <div className="flex items-center space-x-2">
                 <div className="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">学歴・養成校・学位</h3>
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">学歴・養成校</h3>
               </div>
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">出身校（養成施設）</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">卒業校（学士・専門課程）</label>
                   <select className="w-full h-16 px-6 bg-slate-50 border-none rounded-2xl font-black shadow-inner appearance-none focus:ring-2 focus:ring-indigo-500" value={formData.schoolName} onChange={e => setFormData({ ...formData, schoolName: e.target.value })}>
-                    <option value="">養成校リストから選択</option>
+                    <option value="">出身養成校を選択</option>
                     {SCHOOL_OPTIONS.map(group => (
                       <optgroup key={group.label} label={group.label}>
                         {group.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -339,162 +350,92 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onAdd, o
                     ))}
                   </select>
                 </div>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* 修士課程 */}
-                  <div className={`p-8 rounded-[2.5rem] border-2 transition-all ${formData.hasMaster ? 'bg-indigo-50 border-indigo-200 shadow-lg' : 'bg-white border-slate-50'}`}>
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl ${formData.hasMaster ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-300'}`}><GraduationCap size={24} /></div>
-                        <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Master's</p>
-                          <p className="text-sm font-black text-slate-900">修士課程 修了</p>
-                        </div>
-                      </div>
-                      <input type="checkbox" className="w-6 h-6 rounded-lg accent-indigo-600" checked={formData.hasMaster} onChange={e => setFormData({ ...formData, hasMaster: e.target.checked })} />
-                    </div>
+                  <div className={`p-6 rounded-3xl border-2 transition-all space-y-4 ${formData.hasMaster ? 'bg-indigo-50 border-indigo-600 ring-2 ring-indigo-600/10' : 'bg-white border-slate-100'}`}>
+                    <button type="button" onClick={() => setFormData({ ...formData, hasMaster: !formData.hasMaster })} className="flex items-center space-x-3 w-full">
+                      <div className={`p-2 rounded-lg ${formData.hasMaster ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}`}><GraduationCap size={20} /></div>
+                      <span className={`text-xs font-black uppercase tracking-widest ${formData.hasMaster ? 'text-indigo-900' : 'text-slate-400'}`}>修士課程 修了</span>
+                    </button>
                     {formData.hasMaster && (
-                      <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                        <select className="w-full h-12 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold shadow-sm" value={formData.masterSchool} onChange={e => setFormData({ ...formData, masterSchool: e.target.value })}>
-                          <option value="">大学院を選択</option>
-                          {GRAD_SCHOOL_OPTIONS.map(g => (
-                            <optgroup key={g.label} label={g.label}>
-                              {g.options.map(o => <option key={o} value={o}>{o}</option>)}
-                            </optgroup>
-                          ))}
-                        </select>
-                      </div>
+                      <select className="w-full h-12 px-4 bg-white border-none rounded-xl text-xs font-bold shadow-sm focus:ring-2 focus:ring-indigo-500 animate-in fade-in slide-in-from-top-1" value={formData.masterSchool} onChange={e => setFormData({ ...formData, masterSchool: e.target.value })}>
+                        <option value="">大学院名を選択</option>
+                        {GRAD_SCHOOL_OPTIONS.map(group => (
+                          <optgroup key={group.label} label={group.label}>
+                            {group.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                          </optgroup>
+                        ))}
+                      </select>
                     )}
                   </div>
-                  {/* 博士課程 */}
-                  <div className={`p-8 rounded-[2.5rem] border-2 transition-all ${formData.hasDoctor ? 'bg-indigo-50 border-indigo-200 shadow-lg' : 'bg-white border-slate-50'}`}>
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-2xl ${formData.hasDoctor ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-300'}`}><ShieldCheck size={24} /></div>
-                        <div>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Doctoral</p>
-                          <p className="text-sm font-black text-slate-900">博士課程 修了</p>
-                        </div>
-                      </div>
-                      <input type="checkbox" className="w-6 h-6 rounded-lg accent-indigo-600" checked={formData.hasDoctor} onChange={e => setFormData({ ...formData, hasDoctor: e.target.checked })} />
-                    </div>
+                  <div className={`p-6 rounded-3xl border-2 transition-all space-y-4 ${formData.hasDoctor ? 'bg-purple-50 border-purple-600 ring-2 ring-purple-600/10' : 'bg-white border-slate-100'}`}>
+                    <button type="button" onClick={() => setFormData({ ...formData, hasDoctor: !formData.hasDoctor })} className="flex items-center space-x-3 w-full">
+                      <div className={`p-2 rounded-lg ${formData.hasDoctor ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-400'}`}><ShieldCheck size={20} /></div>
+                      <span className={`text-xs font-black uppercase tracking-widest ${formData.hasDoctor ? 'text-purple-900' : 'text-slate-400'}`}>博士課程 修了</span>
+                    </button>
                     {formData.hasDoctor && (
-                      <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                        <select className="w-full h-12 px-4 bg-white border border-slate-100 rounded-xl text-xs font-bold shadow-sm" value={formData.doctorSchool} onChange={e => setFormData({ ...formData, doctorSchool: e.target.value })}>
-                          <option value="">大学院を選択</option>
-                          {GRAD_SCHOOL_OPTIONS.map(g => (
-                            <optgroup key={g.label} label={g.label}>
-                              {g.options.map(o => <option key={o} value={o}>{o}</option>)}
-                            </optgroup>
-                          ))}
-                        </select>
-                      </div>
+                      <select className="w-full h-12 px-4 bg-white border-none rounded-xl text-xs font-bold shadow-sm focus:ring-2 focus:ring-purple-500 animate-in fade-in slide-in-from-top-1" value={formData.doctorSchool} onChange={e => setFormData({ ...formData, doctorSchool: e.target.value })}>
+                        <option value="">大学院名を選択</option>
+                        {GRAD_SCHOOL_OPTIONS.map(group => (
+                          <optgroup key={group.label} label={group.label}>
+                            {group.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                          </optgroup>
+                        ))}
+                      </select>
                     )}
                   </div>
                 </div>
               </div>
             </section>
 
-            {/* 保有資格（超・充実版） */}
             <section className="space-y-6">
               <div className="flex items-center space-x-2">
                 <div className="w-1.5 h-5 bg-emerald-500 rounded-full"></div>
-                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">保有認定・専門資格</h3>
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">専門・認定資格（網羅版）</h3>
               </div>
-              <div className="space-y-10">
+              <div className="space-y-8">
                 {CERT_CATEGORIES.filter(cat => cat.id === 'common' || cat.id === formData.role).map(cat => (
                   <div key={cat.id} className="space-y-4">
-                    <div className="flex items-center gap-3 ml-1">
-                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{cat.label}</p>
-                       <div className="h-px bg-slate-100 flex-1"></div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                       <Award size={12} className="text-amber-500" /> {cat.label}
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                       {cat.items.map(cert => (
-                        <button key={cert} type="button" onClick={() => toggleCert(cert)} className={`px-4 py-3 rounded-2xl text-[10px] font-bold text-left transition-all border-2 flex items-center justify-between group ${certList.includes(cert) ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg scale-[1.02]' : 'bg-white border-slate-50 text-slate-400 hover:border-emerald-100 hover:bg-emerald-50/30'}`}>
-                          <span className="line-clamp-2">{cert}</span>
-                          <div className={`shrink-0 ml-2 transition-all ${certList.includes(cert) ? 'text-white' : 'text-slate-100 group-hover:text-emerald-200'}`}>
-                            <CheckCircle2 size={16} />
-                          </div>
+                        <button 
+                          key={cert} 
+                          type="button" 
+                          onClick={() => toggleCert(cert)} 
+                          className={`px-3 py-3 rounded-xl text-[9px] font-bold transition-all border-2 flex items-center justify-center text-center leading-tight h-14 ${certList.includes(cert) ? 'bg-emerald-600 border-emerald-600 text-white shadow-md' : 'bg-white border-slate-50 text-slate-400 hover:border-emerald-100'}`}
+                        >
+                          {cert}
                         </button>
                       ))}
                     </div>
                   </div>
                 ))}
-                
-                <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                  <div className="flex items-center gap-2 mb-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <PlusCircle size={16} /> その他・自由記述 / 実績
-                  </div>
-                  <textarea className="w-full h-24 px-6 py-5 bg-white border-none rounded-[1.5rem] text-sm font-bold shadow-inner resize-none focus:ring-2 focus:ring-indigo-500" placeholder="学会発表、地域活動、または上記にない専門研修修了実績などを入力..." value={formData.otherSkills} onChange={e => setFormData({ ...formData, otherSkills: e.target.value })} />
-                </div>
               </div>
             </section>
 
+            <section className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-5 bg-slate-400 rounded-full"></div>
+                <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">ポートフォリオ・実績</h3>
+              </div>
+              <textarea 
+                className="w-full h-40 p-6 bg-slate-50 border-none rounded-[2.5rem] text-sm font-medium shadow-inner focus:ring-2 focus:ring-indigo-500 resize-none leading-relaxed"
+                placeholder="研究発表、学会活動、院内委員会、外部講師の実績など..."
+                value={formData.otherSkills}
+                onChange={e => setFormData({ ...formData, otherSkills: e.target.value })}
+              />
+            </section>
           </form>
 
-          {/* ACTIONS */}
-          <div className="p-8 bg-white border-t border-slate-50 shrink-0 flex items-center gap-6 shadow-2xl">
-            <button type="button" onClick={onClose} className="hidden md:flex flex-1 h-18 bg-slate-100 text-slate-600 rounded-[2.5rem] font-black items-center justify-center uppercase text-xs tracking-widest">キャンセル</button>
+          <div className="p-8 bg-white border-t border-slate-50 flex items-center gap-6 shadow-2xl shrink-0">
+            <button type="button" onClick={onClose} className="flex-1 h-18 bg-slate-100 text-slate-600 rounded-[2.5rem] font-black uppercase text-xs tracking-widest transition-all hover:bg-slate-200">キャンセル</button>
             <button onClick={handleSubmit} className="flex-[2] h-18 bg-slate-900 text-white rounded-[2.5rem] font-black flex items-center justify-center space-x-3 shadow-2xl hover:bg-indigo-600 transition-all uppercase text-sm tracking-widest">
               <Save size={20} /> <span>{editStaff ? '情報を更新' : 'スタッフを登録'}</span>
             </button>
           </div>
         </div>
-
-        {/* REVIEW SIDEBAR */}
-        <aside className="hidden lg:flex w-[380px] bg-slate-50 border-l border-slate-100 flex-col overflow-hidden">
-          <div className="p-10 flex flex-col h-full space-y-8">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="text-indigo-600" />
-              <h4 className="font-black text-slate-900 uppercase text-sm tracking-tight">Personnel Preview</h4>
-            </div>
-            
-            <div className="bg-white p-8 rounded-[3rem] shadow-sm space-y-6">
-              <div>
-                <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Target Personnel</p>
-                <p className="text-3xl font-black text-slate-900 leading-none mt-2">{formData.lastName || '---'} {formData.firstName || '---'}</p>
-                <p className={`text-[10px] font-black uppercase mt-3 tracking-widest ${ROLES.find(r => r.id === formData.role)?.color}`}>
-                   {ROLES.find(r => r.id === formData.role)?.fullLabel}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
-                <div>
-                  <p className="text-[9px] font-black text-slate-300 uppercase">Exp History</p>
-                  <p className="text-lg font-black text-slate-900">{formData.experienceYears}yr</p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-slate-300 uppercase">Ladder Pos</p>
-                  <p className="text-lg font-black text-indigo-600">Level {formData.clinicalLadder}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-8 bg-slate-900 rounded-[3rem] text-white flex-1 space-y-6 overflow-hidden flex flex-col">
-              <div className="flex items-center gap-3 border-b border-white/10 pb-4 shrink-0">
-                 <Award size={18} className="text-amber-400" />
-                 <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Registered Credentials</p>
-              </div>
-              <div className="flex-1 overflow-y-auto no-scrollbar space-y-3">
-                 {certList.length > 0 ? (
-                   certList.map((c, i) => (
-                     <div key={i} className="flex items-start gap-2 animate-in slide-in-from-left-2" style={{ animationDelay: `${i * 30}ms` }}>
-                        <div className="w-1 h-1 bg-indigo-500 rounded-full mt-1.5"></div>
-                        <p className="text-[11px] font-bold text-indigo-100 opacity-70 leading-tight">{c}</p>
-                     </div>
-                   ))
-                 ) : (
-                   <p className="text-[11px] font-bold text-slate-500 italic">No credentials selected</p>
-                 )}
-              </div>
-              <div className="pt-4 border-t border-white/10 shrink-0">
-                 <p className="text-[9px] font-black text-slate-500 uppercase">Current Deployment</p>
-                 <p className="text-[10px] font-bold text-white/40 mt-1">
-                   {formData.experienceHistory[formData.experienceHistory.length - 1]?.domains[0] || "---"} チームに配属
-                 </p>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
     </div>
   );

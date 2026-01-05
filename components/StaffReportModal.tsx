@@ -25,7 +25,16 @@ const StaffReportModal: React.FC<StaffReportModalProps> = ({ staff, isOpen, onCl
           </div>
           <div className="flex items-center space-x-3">
             {onDelete && (
-              <button onClick={() => onDelete(staff.id)} className="p-3 text-slate-300 hover:text-rose-500 transition-colors"><Trash2 size={20} /></button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(staff.id);
+                }} 
+                className="p-3 text-slate-300 hover:text-rose-500 transition-colors"
+                title="スタッフを削除"
+              >
+                <Trash2 size={20} />
+              </button>
             )}
             <button onClick={handlePrint} className="flex items-center space-x-2 bg-slate-100 text-slate-600 px-5 py-3 rounded-2xl text-xs font-black hover:bg-slate-200 transition-all"><Printer size={16} /> <span className="hidden sm:inline uppercase">Print Report</span></button>
             <button onClick={onClose} className="p-3 bg-slate-50 text-slate-400 rounded-2xl"><X size={24} /></button>
